@@ -14,12 +14,25 @@ LINE = (
 )
 
 
+def _validate(line: str) -> bytes:
+    """Validate the pickup line and return it as deterministic UTF-8 bytes.
+
+    Rules: exactly one line, 1-200 characters, valid UTF-8.
+    """
+    if "\n" in line or "\r" in line:
+        raise ValueError("pickup line must be a single line")
+    if not 1 <= len(line) <= 200:
+        raise ValueError("pickup line must be 1-200 characters")
+    return line.encode("utf-8")  # raises UnicodeEncodeError if not valid UTF-8
+
+
 def main() -> None:
     out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
     os.makedirs(out_dir, exist_ok=True)
     path = os.path.join(out_dir, "entry.txt")
-    with open(path, "w", encoding="utf-8", newline="") as f:
-        f.write(LINE)
+    data = _validate(LINE)
+    with open(path, "wb") as f:
+        f.write(data)
 
 
 if __name__ == "__main__":
